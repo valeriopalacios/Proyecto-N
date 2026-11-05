@@ -62,7 +62,81 @@
   }
   .escena::-webkit-scrollbar { display: none; }
 
-  /* Tarjeta de mensaje */
+  /* ====== PANTALLA DE INICIO (BIENVENIDA) ====== */
+  .pantalla-inicio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    animation: aparecerInicio 2s ease;
+    cursor: pointer;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    padding: 2rem;
+    width: 100%;
+    height: 100%;
+  }
+  .pantalla-inicio:hover { transform: scale(1.05); }
+
+  .pantalla-inicio .corazon-grande {
+    font-size: 7rem;
+    filter: drop-shadow(0 0 30px #ff1e4f) drop-shadow(0 0 60px #ff4d6d);
+    animation: latirFuerte 1.4s infinite ease-in-out;
+  }
+  @keyframes latirFuerte {
+    0%, 100% { transform: scale(1); }
+    15% { transform: scale(1.2); }
+    30% { transform: scale(1); }
+    45% { transform: scale(1.15); }
+    60% { transform: scale(1); }
+  }
+
+  .pantalla-inicio h1 {
+    font-size: 2.5rem;
+    color: #ffd9e6;
+    font-weight: 400;
+    letter-spacing: 2px;
+    text-shadow: 0 0 25px #ff3366;
+    animation: brillar 2.5s infinite alternate;
+  }
+  @keyframes brillar {
+    from { opacity: 0.7; text-shadow: 0 0 15px #ff3366; }
+    to { opacity: 1; text-shadow: 0 0 40px #ff1e4f, 0 0 60px #ff5e7e; }
+  }
+
+  .pantalla-inicio p {
+    font-size: 1.1rem;
+    color: #ffb3c6;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    opacity: 0.9;
+    animation: pulsar 1.8s infinite;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.8rem 1.5rem;
+    border-radius: 30px;
+    border: 1px solid rgba(255, 150, 180, 0.3);
+  }
+  @keyframes pulsar {
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.05); }
+  }
+
+  @keyframes aparecerInicio {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ====== TARJETA DE MENSAJE ====== */
+  .escena-mensaje {
+    display: none; /* Oculto al inicio */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+  }
+  .escena-mensaje.activa { display: flex; }
+
   .tarjeta-mensaje {
     background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(15px);
@@ -213,6 +287,8 @@
 
   /* Responsive */
   @media (max-width: 600px) {
+    .pantalla-inicio h1 { font-size: 1.8rem; }
+    .pantalla-inicio .corazon-grande { font-size: 5rem; }
     .linea-texto { font-size: 1.2rem; line-height: 1.8rem; }
     .tarjeta-mensaje { padding: 2rem 1.5rem; }
     .final .nombre { font-size: 2.2rem; }
@@ -227,16 +303,27 @@
   <div class="fondo-corazones" id="fondoCorazones"></div>
 
   <div class="escena">
-    <!-- Tarjeta principal -->
-    <div class="tarjeta-mensaje">
-      <div class="linea-texto" id="lineaTexto"></div>
-      
-      <div class="progreso" id="progreso"></div>
-      
-      <button class="btn-siguiente" id="btnSiguiente">
-        <span id="textoBoton">Siguiente</span> <span>➤</span>
-      </button>
+    
+    <!-- ====== PANTALLA DE INICIO (EMOTIVA) ====== -->
+    <div class="pantalla-inicio" id="pantallaInicio">
+      <div class="corazon-grande">💖</div>
+      <h1>Hay algo que quiero decirte...</h1>
+      <p>Haz clic para descubrirlo</p>
     </div>
+
+    <!-- ====== TARJETA DE MENSAJES ====== -->
+    <div class="escena-mensaje" id="escenaMensaje">
+      <div class="tarjeta-mensaje">
+        <div class="linea-texto" id="lineaTexto"></div>
+        
+        <div class="progreso" id="progreso"></div>
+        
+        <button class="btn-siguiente" id="btnSiguiente">
+          <span id="textoBoton">Siguiente</span> <span>➤</span>
+        </button>
+      </div>
+    </div>
+
   </div>
 
 <script>
@@ -259,6 +346,8 @@
   const totalPasos = poemas.length + 1; // Poemas + Final
 
   // ====== ELEMENTOS ======
+  const pantallaInicio = document.getElementById('pantallaInicio');
+  const escenaMensaje = document.getElementById('escenaMensaje');
   const lineaTexto = document.getElementById('lineaTexto');
   const progreso = document.getElementById('progreso');
   const btnSiguiente = document.getElementById('btnSiguiente');
@@ -286,7 +375,6 @@
     progreso.innerHTML = '';
     for (let i = 0; i < totalPasos; i++) {
       const dot = document.createElement('span');
-      // Marcamos el activo (pasoActual empieza en 1, los indices en 0)
       if (i === pasoActual - 1) dot.classList.add('activo');
       progreso.appendChild(dot);
     }
@@ -299,15 +387,15 @@
       lineaTexto.innerHTML = poemas[n - 1];
       textoBoton.textContent = (n === poemas.length) ? 'Ver final' : 'Siguiente';
     } else {
-      // Mostrar final con la foto
+      // Mostrar final con la foto (ValNao.jpeg)
       lineaTexto.innerHTML = `
         <div class="final">
           <div class="nombre">${mensajeFinal.nombre}</div>
           <div class="mensaje-final">${mensajeFinal.frase}</div>
           
           <div class="contenedor-foto">
-            <!-- Asegúrate de que la imagen esté en la misma carpeta -->
-            <img src="naomi.jpg" alt="Nuestro recuerdo" class="foto-final">
+            <!-- Asegúrate de que la imagen se llame ValNao.jpeg y esté en la misma carpeta -->
+            <img src="ValNao.jpeg" alt="Nuestro recuerdo" class="foto-final">
           </div>
         </div>
       `;
@@ -364,18 +452,23 @@
   }
 
   // ====== EVENTOS ======
+  // Al hacer clic en la pantalla de inicio
+  pantallaInicio.addEventListener('click', () => {
+    pantallaInicio.style.display = 'none';
+    escenaMensaje.classList.add('activa');
+    pasoActual = 1;
+    mostrarPaso(pasoActual);
+    lluviaCorazones();
+  });
+
   btnSiguiente.addEventListener('click', avanzar);
 
-  // Permitir avanzar con teclado (Enter o flecha derecha)
+  // Permitir avanzar con teclado (Enter o flecha derecha) solo si ya se inició
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowRight' || e.key === 'Enter') {
+    if ((e.key === 'ArrowRight' || e.key === 'Enter') && pantallaInicio.style.display === 'none') {
       avanzar();
     }
   });
-
-  // Iniciar mostrando el primer poema
-  pasoActual = 1;
-  mostrarPaso(pasoActual);
 
 </script>
 </body>
